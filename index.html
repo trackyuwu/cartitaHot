@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Para Tus Ojos 🖤🔥</title>
+    <style>
+      :root {
+            --bg-color: #0b0507; 
+            --envelope-color: #580c1f; 
+            --envelope-inside: #851c34; 
+            --letter-bg: #160a0d; 
+            --text-gold: #dfb15b; 
+            --text-light: #f3e8eb;
+            --secret-pink: #ff2a6d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* CORREGIDO: Eliminamos overflow:hidden para que no te corte la interfaz flotante */
+            overflow-x: hidden; 
+            color: var(--text-light);
+            position: relative;
+        }
+
+        /* --- PANTALLA DE CAMUFLAJE: TIC-TAC-TOE PREMIUM --- */
+        #game-panic-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0f12 0%, #16161a 100%);
+            z-index: 20000; 
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #fff;
+        }
+        
+        .game-title-container {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(180deg, #ffffff 0%, #a5a5b4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .secret-trigger {
+            width: 14px;
+            height: 35px;
+            cursor: default;
+            display: inline-block;
+        }
+
+        .game-subtitle {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 35px;
+            user-select: none;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .tic-tac-toe-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 12px;
+            margin-bottom: 35px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .cell {
+            background: #1e1e24;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.02);
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.05), 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .cell:hover { 
+            background: #25252e; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.05);
+        }
+        
+        .cell.X { 
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(255, 75, 43, 0.5));
+        }
+        
+        .cell.O { 
+            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(0, 180, 219, 0.5));
+        }
+        
+        .game-btn {
+            background: #25252e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            padding: 12px 28px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            user-select: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            letter-spacing: 0.5px;
+        }
+        
+        .game-btn:hover { 
+            background: #2e2e3a; 
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.03);
+        }
+
+        /* --- EFECTO PARTICULAS DE FONDO --- */
+        #particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            bottom: -10px;
+            background: radial-gradient(circle, rgba(223,177,91,0.7) 0%, rgba(88,12,31,0) 70%);
+            border-radius: 50%;
+            animation: floatUp 8s infinite linear;
+        }
+        
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) scale(0.5); opacity: 0; }
+        }
+
+        /* --- BOTÓN DE PÁNICO UNIVERSAL --- */
+        .panic-btn {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            background: rgba(11, 5, 7, 0.8);
+            border: 1px solid rgba(223, 177, 91, 0.4);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 30000; 
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+            user-select: none;
+        }
+        
+        .panic-btn:hover {
+            background: #111;
+            transform: scale(1.1);
+        }
+
+        /* --- PROTECCIÓN POR CONTRASEÑA --- */
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 5, 7, 0.98);
+            z-index: 10000; 
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .password-card {
+            background: var(--letter-bg);
+            border: 1px solid var(--text-gold);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        
+        .password-card h3 { color: var(--text-gold); margin-bottom: 15px; font-size: 1.5rem; letter-spacing: 1px; }
+        .password-card p { font-size: 0.95rem; color: #a5848c; margin-bottom: 25px; font-style: italic; }
+        .password-card input {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid rgba(223, 177, 91, 0.4);
+            border-radius: 6px;
+            color: var(--text-light);
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        
+        .password-card input:focus {
+            border-color: var(--text-gold);
+            box-shadow: 0 0 10px rgba(223, 177, 91, 0.2);
+        }
+        
+        .password-card button {
+            padding: 10px 30px;
+            background: var(--envelope-color);
+            border: 1px solid var(--text-gold);
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .password-card button:hover { background: var(--text-gold); color: var(--bg-color); }
+        .error-msg { color: #ff4a4a; font-size: 0.85rem; margin-top: 10px; display: none; }
+
+        /* --- EL SOBRE --- */
+        .envelope-wrapper {
+            position: relative;
+            width: 400px;
+            height: 300px;
+            background-color: var(--envelope-color);
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), inset 0 1px 3px rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+        }
+        
+        .seal {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            z-index: 4;
+            transition: transform 0.4s ease;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+        }
+        
+        .envelope-wrapper:hover .seal { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+        .envelope-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 200px solid transparent;
+            border-right: 200px solid transparent;
+            border-top: 150px solid var(--envelope-inside);
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out;
+            z-index: 3;
+        }
+
+        /* --- APERTURA --- */
+        .envelope-wrapper.open {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            box-shadow: none;
+            background-color: transparent;
+            position: fixed;
+            top: 0;
+            left: 0;
+            cursor: default;
+        }
+        
+        .envelope-wrapper.open::before, .envelope-wrapper.open .seal { opacity: 0; pointer-events: none; }
+
+        /* --- LA CARTA INTERACTIVA --- */
+        .letter {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 370px;
+            height: 270px;
+            background-color: var(--letter-bg);
+            border-radius: 6px;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            overflow: hidden;
+            opacity: 0.2;
+            border: 1px solid rgba(223, 177, 91, 0.1);
+        }
+        
+        .envelope-wrapper.open .letter {
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            opacity: 1;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        
+        .letter-content { display: none; opacity: 0; transition: opacity 0.6s ease; }
+        .envelope-wrapper.open .letter-content { display: block; opacity: 1; }
+
+        /* --- NAVEGACIÓN FLOTANTE --- */
+        .nav-burbuja {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(11, 5, 7, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(223, 177, 91, 0.3);
+            padding: 12px 30px;
+            border-radius: 30px;
+            display: flex;
+            gap: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            z-index: 100;
+        }
+        
+        .nav-burbuja a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: 'Segoe UI', sans-serif;
+            transition: color 0.3s;
+            white-space: nowrap;
+        }
+        
+        .nav-burbuja a:hover { color: var(--text-gold); }
+
+        /* --- CORREGIDO: NUEVO DISEÑO IMPERMEABLE PARA EL REPRODUCTOR --- */
+        #musicPlayerContainer {
+            position: fixed !important; /* Forzamos posición fija en la pantalla */
+            top: 25px;
+            right: 25px;
+            background: #580c1f !important; /* Fondo sólido para que no se trasluzca nada por detrás */
+            border: 2px solid var(--text-gold) !important;
+            padding: 3px;
+            border-radius: 30px;
+            display: flex; /* Se alineará horizontalmente cuando JS pase el display de 'none' a 'flex' */
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 99999 !important; /* Capa ultra alta por encima de la carta abierta */
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 45px;
+            height: 45px;
+            overflow: hidden;
+        }
+
+        /* Se expande suavemente hacia la izquierda al pasar el mouse o mantenerse activo */
+        #musicPlayerContainer:hover, #musicPlayerContainer.active {
+            max-width: 250px; 
+            padding: 3px 14px 3px 3px;
+        }
+
+        /* Botón del emoji de nota musical */
+        #musicBtn {
+            background: #0b0507 !important;
+            border: 1px solid rgba(223, 177, 91, 0.5);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            user-select: none;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        #musicBtn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Contenedor interno de los tres botones (Prev, Play/Pausa, Next) */
+        #musicControls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.35s ease;
+            margin-left: 12px;
+        }
+
+        /* Revela los controles cuando el contenedor se expande */
+        #musicPlayerContainer:hover #musicControls,
+        #musicPlayerContainer.active #musicControls {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Estilo base para los botones internos ⏮️ ⏸️ ⏭️ */
+        .control-btn {
+            background: transparent !important;
+            border: none !important;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light) !important;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.3);
+            color: var(--text-gold) !important;
+        }
+
+        /* Secciones */
+        section {
+            padding: 100px 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        #inicio-hot { text-align: center; min-height: 100vh; }
+        
+        .typewriter {
+            display: inline-block;
+            overflow: hidden;
+            border-right: 3px solid var(--text-gold);
+            white-space: nowrap;
+            margin: 0 auto 25px auto;
+            letter-spacing: 2px;
+            animation: typing 3.5s steps(30, end), blink-caret 0.75s step-end infinite;
+            font-size: 4rem;
+            color: var(--text-gold);
+            text-shadow: 0 0 20px rgba(223, 177, 91, 0.4);
+        }
+        
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--text-gold); } }
+
+        #inicio-hot p { font-size: 1.4rem; color: var(--text-light); font-style: italic; max-width: 600px; margin: 0 auto; line-height: 1.8; }
+
+        /* --- CONTADOR --- */
+        .counter-container {
+            margin: 40px auto 0 auto;
+            background: rgba(88, 12, 31, 0.1);
+            border: 1px solid rgba(223, 177, 91, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 550px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+        
+        .counter-title { font-size: 1.1rem; color: var(--text-gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 15px; font-family: 'Segoe UI', sans-serif; }
+        .counter-grid { display: flex; justify-content: space-around; gap: 10px; }
+        .counter-box .num { font-size: 2rem; font-weight: bold; color: var(--text-light); display: block; }
+        .counter-box .label { font-size: 0.8rem; text-transform: uppercase; color: #a5848c; font-family: 'Segoe UI', sans-serif; }
+
+        /* --- IMÁGENES NIEBLA --- */
+        .hot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-top: 50px; }
+        .hot-card { position: relative; height: 480px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(223, 177, 91, 0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.5); background-color: #000; }
+        .hot-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; }
+        
+        .hot-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(22, 10, 13, 0.9); backdrop-filter: blur(4px); padding: 35px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 1; transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.8s ease; text-align: center; overflow-y: auto; 
+        }
+        
+        .hot-card:hover .hot-overlay { background: rgba(22, 10, 13, 0.35); backdrop-filter: blur(0px); }
+        .hot-card:hover img { transform: scale(1.05); }
+        .hot-overlay h3 { color: var(--text-gold); font-size: 1.6rem; margin-bottom: 15px; border-bottom: 1px solid rgba(223, 177, 91, 0.3); padding-bottom: 10px; width: 100%; }
+        .hot-overlay p { font-size: 0.95rem; line-height: 1.6; color: var(--text-light); font-family: 'Segoe UI', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
+
+        /* EASTER EGG PIXEL EN LA PRIMERA CARD DE LA GALERÍA */
+        .gallery-pixel-egg { position: absolute; bottom: 8px; left: 8px; width: 8px; height: 8px; background: var(--text-gold); opacity: 0.2; cursor: pointer; border-radius: 50%; z-index: 15; }
+
+        /* --- VIDEOS --- */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 25px; max-width: 900px; width: 100%; margin: 40px auto 0 auto; position: relative; }
+        .video-container { border-radius: 12px; overflow: hidden; border: 1px solid rgba(223, 177, 91, 0.3); box-shadow: 0 15px 35px rgba(0,0,0,0.6); background: #000; display: flex; justify-content: center; align-items: center; }
+        .video-container video { width: 100%; height: auto; max-height: 50vh; display: block; }
+        
+        /* EL NUEVO BOTÓN CAMUFLADO DE VIDEOS: UN DESTELLO BRILLANTE JUNTO AL TÍTULO */
+        .video-section-icon {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+            user-select: none;
+        }
+        .video-section-icon:hover { opacity: 1; color: var(--text-gold); }
+
+        /* --- CONFESIONES --- */
+        .confessions-flex { display: flex; flex-direction: column; gap: 25px; max-width: 800px; margin: 50px auto 0 auto; }
+        .confession-box { position: relative; background: rgba(88, 12, 31, 0.15); border: 1px solid rgba(85, 28, 52, 0.4); padding: 30px; border-radius: 6px; display: flex; gap: 20px; align-items: flex-start; transition: background 0.3s; }
+        .confession-box:hover { background: rgba(88, 12, 31, 0.3); }
+        .confession-box .icon { font-size: 2rem; line-height: 1; }
+        .confession-box .text h4 { color: var(--text-gold); font-size: 1.25rem; margin-bottom: 8px; }
+        .confession-box .text p { font-size: 1rem; line-height: 1.6; color: #d3c4c7; }
+
+        /* DISPARADOR SECRETO CORAZÓN ORIGINAL */
+        .hidden-easter-egg {
+            position: absolute; bottom: 5px; right: 5px;
+            width: 20px; height: 20px; opacity: 0.15;
+            cursor: pointer; user-select: none; z-index: 10;
+        }
+
+        /* --- INTERFAZ OVERLAY GLOBAL DEL LABORATORIO DE SECRETOS --- */
+        #secret-lab-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(5, 2, 3, 0.97);
+            z-index: 15000; display: none;
+            justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.4s ease;
+        }
+        .secret-lab-card {
+            background: #1a0b10; border: 2px dashed var(--secret-pink);
+            padding: 35px; border-radius: 16px; text-align: center;
+            max-width: 520px; width: 92%; box-shadow: 0 0 30px rgba(255, 42, 109, 0.3);
+            overflow-y: auto; max-height: 90vh;
+        }
+        .secret-lab-card h2 { color: var(--secret-pink); margin-bottom: 5px; font-size: 1.8rem; }
+        .secrets-badge { display: inline-block; background: var(--envelope-color); color: var(--text-gold); padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; margin-bottom: 20px; font-weight: bold; border: 1px solid var(--text-gold); font-family: 'Segoe UI', sans-serif; }
+
+        /* Wrappers de juego que se alternan */
+        .secret-game-wrapper { display: none; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin-top: 15px; text-align: left; }
+        .secret-game-wrapper.active { display: block; }
+
+        /* Estilos Quiz */
+        .quiz-option-btn { display: block; width: 100%; padding: 12px; background: #2d121a; border: 1px solid rgba(223,177,91,0.3); color: white; border-radius: 6px; margin-bottom: 10px; text-align: left; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
+        .quiz-option-btn:hover { background: var(--envelope-inside); border-color: var(--text-gold); }
+        .quiz-progress { font-size: 0.85rem; color: #a5848c; text-align: right; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; }
+
+        /* Estilo Raspa y Gana Virtual */
+        .scratch-area { width: 100%; height: 120px; background: #261116; display: flex; justify-content: center; align-items: center; border-radius: 8px; cursor: pointer; font-weight: bold; color: #fff; border: 2px dashed var(--text-gold); position: relative; overflow: hidden; }
+        .scratch-cover { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #580c1f, #2d050e); display:flex; justify-content:center; align-items:center; color: var(--text-gold); transition: opacity 0.5s; user-select: none; }
+
+        .reward-box {
+            display: none; background: rgba(255, 42, 109, 0.12);
+            border: 1px solid var(--secret-pink); padding: 15px;
+            border-radius: 8px; margin-top: 15px; color: #fff; font-style: italic;
+            text-align: center; animation: fadeIn 0.5s ease;
+        }
+
+        .close-secret-lab {
+            margin-top: 25px; background: transparent; border: 1px solid #666;
+            color: #999; padding: 8px 20px; border-radius: 4px; cursor: pointer;
+        }
+        .close-secret-lab:hover { color: white; border-color: white; }
+
+        h2.section-title { font-size: 2.8rem; color: var(--text-gold); text-align: center; margin-bottom: 10px; }
+        p.section-subtitle { text-align: center; color: #a5848c; font-size: 1.1rem; font-style: italic; margin-bottom: 50px; }
+
+        footer { text-align: center; padding: 80px 20px 140px 20px; background: linear-gradient(to top, #050203, transparent); }
+        .close-btn { padding: 15px 35px; background-color: var(--envelope-color); color: var(--text-light); border: 1px solid var(--text-gold); border-radius: 4px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(88,12,31,0.4); }
+        .close-btn:hover { background-color: var(--text-gold); color: var(--bg-color); }
+
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .envelope-wrapper { width: 320px; height: 240px; }
+            .envelope-wrapper::before { border-left: 160px solid transparent; border-right: 160px solid transparent; border-top: 120px solid var(--envelope-inside); }
+            .letter { width: 290px; height: 210px; }
+            .typewriter { font-size: 2.3rem; white-space: normal; border-right: none; animation: none; }
+            #inicio-hot p { font-size: 1.1rem; }
+            h2.section-title { font-size: 2rem; }
+            section { padding: 60px 15px; }
+            .hot-grid { grid-template-columns: 1fr; gap: 20px; }
+            .hot-card { height: auto; aspect-ratio: 3 / 4; }
+            .hot-overlay { background: rgba(22, 10, 13, 0.85); backdrop-filter: none; }
+            .video-grid { grid-template-columns: 1fr; gap: 15px; }
+            .nav-burbuja { width: 90%; padding: 10px 15px; gap: 15px; overflow-x: auto; justify-content: flex-start; }
+            .nav-burbuja a { font-size: 0.75rem; letter-spacing: 1px; }
+            .confession-box { flex-direction: column; align-items: center; text-align: center; padding: 20px; }
+            .counter-grid { gap: 5px; }
+            .counter-box .num { font-size: 1.5rem; }
+            .panic-btn { top: 15px; left: 15px; width: 40px; height: 40px; }
+            .tic-tac-toe-grid { grid-template-columns: repeat(3, 85px); grid-template-rows: repeat(3, 85px); gap: 10px; padding: 10px; }
+            .cell { font-size: 2.2rem; }
+            .game-title-container { font-size: 1.8rem; }
+            
+            /* Ajustes corregidos del reproductor para móviles */
+            #musicPlayerContainer { 
+                top: 15px; 
+                right: 15px; 
+                height: 40px; 
+                max-width: 40px; 
+            }
+            #musicPlayerContainer:hover, #musicPlayerContainer.active { 
+                max-width: 210px; 
+                padding: 3px 10px 3px 3px; 
+            }
+            #musicBtn { 
+                width: 30px; 
+                height: 30px; 
+                font-size: 0.95rem; 
+            }
+            #musicControls { 
+                gap: 12px; 
+                margin-left: 8px; 
+            }
+            .control-btn { 
+                font-size: 0.95rem; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="panic-btn" id="panicBtn" title="Modo Casual">🤫</div>
+
+    <div id="game-panic-screen">
+        <div class="game-title-container">
+            <span>Tic</span>
+            <div class="secret-trigger" id="secretReturnTrigger"></div>
+            <span>Tac-Toe</span>
+        </div>
+        <div class="game-subtitle" id="gameStatus">Tu turno (X)</div>
+        
+        <div class="tic-tac-toe-grid" id="gameBoard">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        
+        <button class="game-btn" id="resetGameBtn">Reiniciar Tablero</button>
+    </div>
+
+    <div id="musicPlayerContainer" class="music-player-container">
+        <div class="music-main-btn" id="musicBtn" title="Controles de Música">🎵</div>
+        <div class="music-controls" id="musicControls">
+            <button class="control-btn" id="prevBtn" title="Anterior">⏮️</button>
+            <button class="control-btn" id="playPauseBtn" title="Play/Pausa">⏸️</button>
+            <button class="control-btn" id="nextBtn" title="Siguiente">⏭️</button>
+        </div>
+    </div>
+
+    <audio id="bgMusic" src=""></audio>
+
+    <div class="password-overlay" id="passwordOverlay">
+        <div class="password-card">
+            <h3>Acceso Restringido 🔒</h3>
+            <p>"Para revelar los secretos que guardo aquí dentro, introduce nuestra clave secreta..."</p>
+            <input type="text" id="passwordInput" placeholder="Escribe la clave aquí..." autocomplete="off">
+            <button id="submitPassword">Entrar</button>
+            <p class="error-msg" id="errorMsg">Respuesta incorrecta... Inténtalo de nuevo con el corazón. 🔥</p>
+        </div>
+    </div>
+
+    <div class="envelope-wrapper" id="envelope">
+        <div class="seal">🖤</div>
+        
+        <div class="letter" id="letter">
+            <div id="particles-container"></div>
+
+            <div class="letter-content">
+                
+                <nav class="nav-burbuja">
+                    <a href="#inicio-hot">Deseo</a>
+                    <a href="#galeria-secreta">Secretos</a>
+                    <a href="#cine-privado">Nuestro Clip</a>
+                    <a href="#confesiones">Confesiones</a>
+                </nav>
+
+                <section id="inicio-hot">
+                    <h1 class="typewriter">Solo Tú Y Yo</h1>
+                    <p>"Hay miradas que muerden, labios que queman y un magnetismo entre nosotros que es simplemente imposible de ignorar. Quédate, apaga el resto del mundo y lee lo que tengo preparado para ti..."</p>
+                    
+                    <div class="counter-container" id="secretCounterTrigger">
+                        <p class="counter-title">Tiempo Almacenando Electricidad ⚡</p>
+                        <div class="counter-grid">
+                            <div class="counter-box"><span class="num" id="days">00</span><span class="label">Días</span></div>
+                            <div class="counter-box"><span class="num" id="hours">00</span><span class="label">Horas</span></div>
+                            <div class="counter-box"><span class="num" id="mins">00</span><span class="label">Min</span></div>
+                            <div class="counter-box"><span class="num" id="secs">00</span><span class="label">Seg</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="galeria-secreta" class="reveal">
+                    <h2 class="section-title">Instantes De Deseo</h2>
+                    <p class="section-subtitle">Descubre la imagen rompiendo la niebla con el cursor...</p>
+                    
+                    <div class="hot-grid">
+                        <div class="hot-card">
+                            <img src="./marcada.jpg" alt="Imagen 1">
+                            <div class="hot-overlay">
+                                <h3>Fuego En La Piel</h3>
+                                <p>Amo cada instante contigo! Y cada cuckeada que te hago, no quisiera nunca perder esta relacion contigo, haces que me sienta como la niña mas afortunada de todas! me haces feliz con todo esto corazon 💝</p>
+                            </div>
+                            <div class="gallery-pixel-egg" id="secretPixelTrigger" title="¿Un detalle brillante?"></div>
+                        </div>
+
+                        <div class="hot-card">
+                            <img src="./chastity.jpg" alt="Imagen 2">
+                            <div class="hot-overlay">
+                                <h3>Madrugadas Contigo</h3>
+                                <p>Quisiera poder en un futuro dormir de esta forma contigo y en las madrugadas verte con tu jaulita y yo con ese tatuaje bbc, que cada dia recuerdes a quien le pertenezco amor ♠️🔐</p>
+                            </div>
+                        </div>
+
+                        <div class="hot-card">
+                            <img src="./Comic.jpg" alt="Imagen 3">
+                            <div class="hot-overlay">
+                                <h3>Secretos Compartidos</h3>
+                                <p>Amo los secretos que compartimos y los fetiches que tenemos! Y amo que me dejes ser tan libre y que tengas tantas restricciones y mis amantes ninguna, todo eso hace que empiece a querete y amarte mucho mas 🫂✨</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="cine-privado" class="reveal">
+                    <h2 class="section-title">
+                        En Movimiento 
+                        <span class="video-section-icon" id="secretVideoTrigger" title="¿Qué pasa si me tocas?">✨</span>
+                    </h2>
+                    <p class="section-subtitle">Un pequeño fragmento de lo que somos y queremos para nuestra vida y nuestro futuro...</p>
+                    
+                    <div class="video-grid">
+                        <div class="video-container">
+                            <video class="love-video" controls playsinline loop>
+                                <source src="./4364853.mov480.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="video-container">
+                            <video class="love-video" controls playsinline loop>
+                                <source src="./906-1.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="video-container">
+                            <video class="love-video" controls playsinline loop>
+                                <source src="./x_1080p_20260307_094916.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                        <div class="video-container">
+                            <video class="love-video" controls playsinline loop>
+                                <source src="./SPOILER_2eff042cf30fabd5ef9601e4507f773a_1.mp4" type="video/mp4">
+                            </video>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="confesiones" class="reveal">
+                    <h2 class="section-title">Confesiones Nocturnas</h2>
+                    <p class="section-subtitle">Lo que pasa por mi mente cuando la noche cae</p>
+                    
+                    <div class="confessions-flex">
+                        <div class="confession-box">
+                            <div class="icon">🔥</div>
+                            <div class="text">
+                                <h4>La vez que te conocí</h4>
+                                <p>Jamás imaginé que conocería al amor de mi vida de una forma tan inesperada. Lo que comenzó como una simple conexión por curiosidad y confianza, 
+                                    poco a poco se transformó en algo mucho más profundo. Entre conversaciones, risas y momentos compartidos, terminamos enamorándonos de verdad. 
+                                    Hoy seguimos disfrutando nuestra complicidad, nuestra conexión única y cada instante juntos, porque más allá de cualquier fetiche, lo más importante es el amor, la confianza 
+                                    y lo felices que somos el uno con el otro.</p>
+                            </div>
+                        </div>
+
+                        <div class="confession-box">
+                            <div class="icon">💋</div>
+                            <div class="text">
+                                <h4>Mi adicción favorita</h4>
+                                <p>Mi adicción favorita eres y siempre seras tu bb, mas alla de cualquier fetiche y mas alla de cualquier cosa, amo como eres, amo tus gustos, lo pervertido que eres,
+                                    la morbosidad y quimica que tenemos y amo y adoro mucho que seas un cornudo! Mi cucky bello, Muack. Te adoro mi vida ❤️.
+                                </p>
+                            </div>
+                            
+                            <div class="hidden-easter-egg" id="finalSecretTrigger" title="¿Qué es esto?">❤️</div>
+                        </div>
+                        <div class="confession-box">
+                            <div class="icon">💭</div>
+                            <div class="text">
+                                <h4>El futuro que me imagino a tu lado</h4>
+                                <p>Me imagino un futuro lleno de amor, morbosidad y muchos cuernos! Un futuro donde te sea un monton de veces infiel y haga crecer esos lindos cuernitos,
+                                    un futuro donde tengamos un bull para ambos, un futuro donde pueda estar en un bukkake y besarte mientras me ves coger con otros o que me veas besar a otras personas,
+                                    un futuro donde te de mucho amor y cariño y nada de sexo ni que me veas desnuda, ni en fotos ni nada, solo a veces y que mis amantes si puedan hacer todo eso, darles amor,
+                                    cariño y besos como a ti, pero ademas dejar que puedan verme desnuda, cogerme y demas amor, no como tú que no puedes y te mantendras enjaulado, pero ellos nunca, nunca van a recibir
+                                    el amor verdadero que te doy a ti mi vida! Te adoro demasiado!!! 🔮💭❤️
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer>
+                    <p style="margin-bottom: 30px; color: #a5848c; font-style: italic;">Esto queda sellado entre los dos...</p>
+                    <button class="close-btn" id="closeBtn">Cerrar y Guardar Secreto 🔒</button>
+                </footer>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="secret-lab-overlay">
+        <div class="secret-lab-card">
+            <h2 id="secretLabTitle">¡Mensaje Encontrado! 👾</h2>
+            <div class="secrets-badge">Misiones Completadas: <span id="secretsCountText">0/4</span></div>
+            
+            <div class="secret-game-wrapper" id="gameContent-Quiz">
+                <div class="quiz-progress" id="quizProgress">Pregunta 1 de 10</div>
+                <div id="quizQuestionBody" style="font-weight: bold; margin-bottom: 15px; color: var(--text-gold);">Cargando...</div>
+                <div id="quizOptionsBody"></div>
+            </div>
+
+            <div class="secret-game-wrapper" id="gameContent-Memory">
+                <p style="margin-bottom: 15px; color: var(--text-gold); font-size: 1.1rem; line-height: 1.5;">✨ Has activado el Secreto del Tiempo.</p>
+                <p style="font-style: italic; color: #d3c4c7; margin-bottom: 15px;">"No importa los días, las horas o los minutos que pasen, cada segundo a tu lado cuenta como mi pedacito de cielo favorito."</p>
+                <button class="quiz-option-btn" onclick="revealMemoryReward('💬 Escríbeme al chat la frase secreta: \'SIEMPRE TUYA\' para desbloquear un beso o una lluvia de besos')">Reclamar Premio Romántico</button>
+            </div>
+
+            <div class="secret-game-wrapper" id="gameContent-Scratch">
+                <p style="margin-bottom: 15px; color: var(--text-light);">Haz clic sobre la tarjeta para raspar la niebla de amor:</p>
+                <div class="scratch-area" onclick="revealScratch()">
+                    <div class="scratch-cover" id="scratchCover">🎰 RASPA AQUÍ CON UN CLIC</div>
+                    <span style="color: var(--text-gold); font-style: italic; padding: 10px; text-align: center;">"Vale por un deseo íntimo que yo te cumpla hoy mismo."</span>
+                </div>
+            </div>
+
+            <div class="secret-game-wrapper" id="gameContent-VideoBonus">
+                <p style="color: var(--text-gold); font-weight: bold; margin-bottom: 10px; font-size: 1.1rem;">🎬 Capturado en Cámara</p>
+                <p style="line-height: 1.6; color: #d3c4c7;">"Me fascina ver como amas tanto que te ponga los cuernos y como te encanta que nuestra relacion sea de esta forma"</p>
+            </div>
+
+            <div class="reward-box" id="rewardBox"></div>
+
+            <button class="close-secret-lab" id="closeSecretLab">Volver a la carta principal</button>
+        </div>
+    </div>
+
+    <script>
+        const envelope = document.getElementById('envelope');
+        const closeBtn = document.getElementById('closeBtn');
+        const letter = document.getElementById('letter');
+        const allVideos = document.querySelectorAll('.love-video');
+        const musicBtn = document.getElementById('musicBtn');
+        const bgMusic = document.getElementById('bgMusic');
+
+        const passwordOverlay = document.getElementById('passwordOverlay');
+        const passwordInput = document.getElementById('passwordInput');
+        const submitPassword = document.getElementById('submitPassword');
+        const errorMsg = document.getElementById('errorMsg');
+
+        const panicBtn = document.getElementById('panicBtn');
+        const gamePanicScreen = document.getElementById('game-panic-screen');
+        const secretReturnTrigger = document.getElementById('secretReturnTrigger');
+        const resetGameBtn = document.getElementById('resetGameBtn');
+        const cells = document.querySelectorAll('.cell');
+        const gameStatus = document.getElementById('gameStatus');
+
+        // SELECTORES DE LA BÚSQUEDA DEL TESORO
+        const secretLabOverlay = document.getElementById('secret-lab-overlay');
+        const closeSecretLab = document.getElementById('closeSecretLab');
+        const rewardBox = document.getElementById('rewardBox');
+        const secretsCountText = document.getElementById('secretsCountText');
+
+        const secretCounterTrigger = document.getElementById('secretCounterTrigger');
+        const secretPixelTrigger = document.getElementById('secretPixelTrigger');
+        const secretVideoTrigger = document.getElementById('secretVideoTrigger');
+        const finalSecretTrigger = document.getElementById('finalSecretTrigger');
+
+        const CLAVE_SECRETA = "cucky <3"; 
+        let secretosEncontrados = new Set();
+        let estadoPrePanic = { cartaAbierta: false, overlayPasswordVisible: false };
+
+        // --- CONFIGURACIÓN DE LA PLAYLIST SECUENCIAL (AUDIOS LOCALES) ---
+        const playlistAudios = [
+            "./Stromae & Pomme - Ma Meilleure Ennemie (Sub español  Lyrics)  (From Arcane Season 2).mp3",
+            "./I LOVE YOU SO  (Sub Español).mp3",
+            "./The Chainsmokers, Mallrat - Wish On An Eyelash (Part 2) (Sub. español).mp3",
+            "./TOPA - Todo Lo Que Quiero Eres Tú (letra).mp3",
+            "./Adachi to Shimamura OP Full  Kimi ni Aeta Hi  Sub Español - Romaji.mp3",
+            "./Smile - Butterfly (Official Music Video).mp3"
+        ];
+        let currentTrackIndex = 0;
+
+        // BANCO MUTABLE DE LAS 10 PREGUNTAS DEL JUEGO
+        const bancoPreguntas = [
+            { q: "1. ¿Cual es o son mis colores favoritos?", e: ["Rojo", "Rosa/Blanco", "Azul", "Gris/Morado"], c: 1 },
+            { q: "2. ¿Cual es mi mayor fantasia?", e: ["Estar en un bukkake", "ser cornuda", "que me vean desnuda", "Ninguna"], c: 0 },
+            { q: "3. ¿Cuál es mi comida favorita absoluta cuando tengo antojo?", e: ["Hamburguesa", "Pizza", "Sushi", "Dulces"], c: 0 },
+            { q: "4. ¿Con quienes tengo el mayor deseo de ponerte los cuernos?", e: ["Mis amigos", "Mis amantes", "Tu mejor amigo", "Tus amigos"], c: 2 },
+            { q: "5. ¿Cual es mi genero de juegos favorito?", e: ["Todos", "Deportes", "shooters", "plataformas"], c: 3 },
+            { q: "6. ¿En qué mes se celebra nuestro aniversario principal?", e: ["Noviembre", "Septiembre", "Enero", "Julio"], c: 0 },
+            { q: "7. ¿cuantas veces hemos tenido sexo?", e: ["Una sola", "Ninguna", "Un par de veces", "Un monton"], c: 0 },
+            { q: "8. ¿Por que me empezo a gustar el ntr?", e: ["Por ver mangas ntr", "Por una anecdota", "Ya me gustaba desde siempre", "Para probar algo nuevo"], c: 1 },
+            { q: "9. ¿Por que le puse los cuernos a mi ex?", e: ["Por pitochico", "Por imbecil", "Por ignorarme", "Para humillarlo"], c: 2 },
+            { q: "10. ¿Cuánto te amo de aquí al infinito en escala del 1 al 10?", e: ["10", "100", "Falta espacio", "Incalculable"], c: 3 }
+        ];
+        let quizActualIndex = 0;
+        let quizAciertos = 0;
+
+        function activarPasadizoSecreto(id, titulo) {
+            secretosEncontrados.add(id);
+            secretsCountText.textContent = `${secretosEncontrados.size}/4`;
+            document.getElementById('secretLabTitle').textContent = titulo;
+            rewardBox.style.display = 'none';
+            
+            document.querySelectorAll('.secret-game-wrapper').forEach(w => w.classList.remove('active'));
+            secretLabOverlay.style.display = 'flex';
+            setTimeout(() => secretLabOverlay.style.opacity = '1', 10);
+        }
+
+        // Disparadores de los secretos
+        secretCounterTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activarPasadizoSecreto("tiempo", "⏳ El Secreto Guardado en el Tiempo");
+            document.getElementById('gameContent-Memory').classList.add('active');
+            revealMemoryReward("❤️ <em>'Cada segundo a tu lado ha valido una eternidad. ¡Gracias por no soltarme!'</em>");
+        });
+
+        secretPixelTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activarPasadizoSecreto("pixel", "🪙 Raspa y Gana de la Suerte");
+            const scratchCover = document.getElementById('scratchCover');
+            if(scratchCover) scratchCover.style.opacity = '1';
+            document.getElementById('gameContent-Scratch').classList.add('active');
+        });
+
+        // Lógica añadida para interactuar con el Raspa y Gana
+        const scratchArea = document.getElementById('gameContent-Scratch');
+        if (scratchArea) {
+            scratchArea.addEventListener('click', revealScratch);
+            scratchArea.addEventListener('mouseenter', revealScratch); 
+        }
+
+        secretVideoTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activarPasadizoSecreto("video", "🎬 Mensaje Escondido en el Rollo");
+            document.getElementById('gameContent-VideoBonus').classList.add('active');
+        });
+
+        allVideos.forEach(vid => {
+            vid.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                activarPasadizoSecreto("video", "🎬 Mensaje Escondido en el Rollo");
+                document.getElementById('gameContent-VideoBonus').classList.add('active');
+            });
+        });
+
+        finalSecretTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activarPasadizoSecreto("quiz", "🧠 Trivia de Conexión: 10 Preguntas");
+            document.getElementById('gameContent-Quiz').classList.add('active');
+            quizActualIndex = 0; quizAciertos = 0;
+            correrQuizRomantico();
+        });
+
+        closeSecretLab.addEventListener('click', () => {
+            secretLabOverlay.style.opacity = '0';
+            setTimeout(() => secretLabOverlay.style.display = 'none', 400);
+        });
+
+        // MECÁNICA DEL QUIZ
+        function correrQuizRomantico() {
+            if (quizActualIndex >= bancoPreguntas.length) {
+                document.getElementById('quizQuestionBody').textContent = "¡Reto Completado!";
+                document.getElementById('quizOptionsBody').innerHTML = "";
+                rewardBox.style.display = 'block';
+                
+                let mensajeFinal = "";
+                if (quizAciertos === 10) {
+                    mensajeFinal = `🏆 <strong>¡PUNTUACIÓN PERFECTA! (10/10)</strong><br><br><em>"¡Dios mío, eres el novio perfecto! Te sabes absolutamente todo al derecho y al revés. Confirmadísimo que eres el amor de mi vida entera. ¡Te amo infinito!"</em>`;
+                } else if (quizAciertos >= 7) {
+                    mensajeFinal = `❤️ <strong>¡Excelente puntuación! (${quizAciertos}/10)</strong><br><br><em>"¡Wow, nos conocemos demasiado bien! Me encanta saber el nivel de conexión que tenemos. Eres mi lugar favorito en el mundo."</em>`;
+                } else if (quizAciertos >= 4) {
+                    mensajeFinal = `✨ <strong>¡No está mal! (${quizAciertos}/10)</strong><br><br><em>"Tienes buena memoria, amor, pero creo que necesitamos tener más citas a solas para refrescar detalles... ¡Es la excusa perfecta para llenarte de besos!"</em>`;
+                } else {
+                    mensajeFinal = `🤭 <strong>¡Uy, mi amor! (${quizAciertos}/10)</strong><br><br><em>"¡Reprobaste el test básico de novios! Jajaja no pasa nada mi vida, te perdono porque sé que me amas, pero hoy te toca consentirme el doble como castigo."</em>`;
+                }
+                
+                rewardBox.innerHTML = mensajeFinal;
+                return;
+            }
+            const data = bancoPreguntas[quizActualIndex];
+            document.getElementById('quizProgress').textContent = `Pregunta ${quizActualIndex + 1} de 10`;
+            document.getElementById('quizQuestionBody').textContent = data.q;
+            
+            const optionsDiv = document.getElementById('quizOptionsBody');
+            optionsDiv.innerHTML = '';
+            
+            data.e.forEach((opcion, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option-btn';
+                btn.textContent = opcion;
+                btn.addEventListener('click', () => {
+                    if (idx === data.c) quizAciertos++;
+                    quizActualIndex++;
+                    correrQuizRomantico();
+                });
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function revealMemoryReward(msg) {
+            rewardBox.style.display = 'block';
+            rewardBox.innerHTML = msg;
+        }
+
+        function revealScratch() {
+            const cover = document.getElementById('scratchCover');
+            if(cover) cover.style.opacity = '0';
+        }
+
+        // --- SISTEMA DE OCULTAMIENTO (TRES EN RAYA) ---
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let isGameActive = true;
+
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        resetGameBtn.addEventListener('click', resetBoard);
+
+        secretReturnTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            gamePanicScreen.style.display = 'none';
+            resetBoard();
+            panicBtn.style.display = 'flex';
+
+            if (estadoPrePanic.cartaAbierta) {
+                envelope.classList.add('open');
+                document.body.style.overflow = 'auto';
+                if (musicPlayerContainer) musicPlayerContainer.style.display = 'flex';
+            } else if (estadoPrePanic.overlayPasswordVisible) {
+                passwordOverlay.style.display = 'flex';
+                passwordOverlay.style.opacity = '1';
+                passwordInput.focus();
+            } else {
+                envelope.classList.remove('open');
+                document.body.style.overflow = 'hidden';
+            }
+        });
+
+        function handleCellClick(e) {
+            const index = e.target.getAttribute('data-index');
+            if (board[index] !== "" || !isGameActive) return;
+
+            makeMove(index, "X");
+            if (checkWin("X")) { gameStatus.textContent = "¡Ganaste!"; isGameActive = false; return; }
+            if (!board.includes("")) { gameStatus.textContent = "Empate"; isGameActive = false; return; }
+
+            gameStatus.textContent = "Pensando...";
+            setTimeout(aiMove, 400);
+        }
+
+        function makeMove(index, player) {
+            board[index] = player;
+            cells[index].textContent = player;
+            cells[index].classList.add(player);
+        }
+
+        function aiMove() {
+            if (!isGameActive) return;
+            let emptyCells = [];
+            board.forEach((val, idx) => { if(val === "") emptyCells.push(idx); });
+            
+            if (emptyCells.length > 0) {
+                let randomIdx = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                makeMove(randomIdx, "O");
+                
+                if (checkWin("O")) { gameStatus.textContent = "Ganó la IA"; isGameActive = false; } 
+                else if (!board.includes("")) { gameStatus.textContent = "Empate"; isGameActive = false; } 
+                else { gameStatus.textContent = "Tu turno (X)"; }
+            }
+        }
+
+        function checkWin(player) {
+            const winConditions = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+            return winConditions.some(cond => cond.every(idx => board[idx] === player));
+        }
+
+        function resetBoard() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            isGameActive = true;
+            gameStatus.textContent = "Tu turno (X)";
+            cells.forEach(cell => { cell.textContent = ""; cell.classList.remove("X", "O"); });
+        }
+
+        panicBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            estadoPrePanic.cartaAbierta = envelope.classList.contains('open');
+            estadoPrePanic.overlayPasswordVisible = (passwordOverlay.style.display === 'flex' || passwordOverlay.style.opacity === '1');
+
+            bgMusic.pause();
+            allVideos.forEach(v => v.pause());
+            
+            passwordOverlay.style.display = 'none';
+            secretLabOverlay.style.display = 'none';
+            if (musicPlayerContainer) musicPlayerContainer.style.display = 'none';
+            document.body.style.overflow = 'hidden';
+            panicBtn.style.display = 'none'; 
+            
+            gamePanicScreen.style.display = 'flex';
+        });
+
+        envelope.addEventListener('click', function(e) {
+            if (!envelope.classList.contains('open')) {
+                passwordOverlay.style.display = 'flex';
+                setTimeout(() => passwordOverlay.style.opacity = '1', 10);
+                passwordInput.focus();
+            }
+        });
+
+        // --- SISTEMA NUEVO DE CONTROL DE MÚSICA INTEGRADO ---
+
+        if (playlistAudios.length > 0) {
+            bgMusic.src = playlistAudios[currentTrackIndex];
+            bgMusic.loop = false; 
+        }
+
+        function cargarYReproducirPista(index) {
+            if (playlistAudios.length === 0) return;
+            currentTrackIndex = index;
+            bgMusic.src = playlistAudios[currentTrackIndex];
+            
+            bgMusic.play().then(() => {
+                const playPauseBtn = document.getElementById('playPauseBtn');
+                if (playPauseBtn) playPauseBtn.textContent = "⏸️";
+            }).catch(error => {
+                console.log("Reproducción bloqueada temporalmente por el navegador.");
+            });
+        }
+
+        function togglePlay() {
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            if (bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    if (playPauseBtn) playPauseBtn.textContent = "⏸️";
+                }).catch(error => console.log(error));
+            } else {
+                bgMusic.pause();
+                if (playPauseBtn) playPauseBtn.textContent = "▶️";
+            }
+        }
+
+        function proximaCancion() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlistAudios.length;
+            cargarYReproducirPista(currentTrackIndex);
+        }
+
+        function anteriorCancion() {
+            currentTrackIndex = (currentTrackIndex - 1 + playlistAudios.length) % playlistAudios.length;
+            cargarYReproducirPista(currentTrackIndex);
+        }
+
+        // Eventos de los tres botones físicos reales
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const musicPlayerContainer = document.getElementById('musicPlayerContainer');
+
+        if (playPauseBtn) playPauseBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+        if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); proximaCancion(); });
+        if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); anteriorCancion(); });
+
+        bgMusic.addEventListener('ended', function() {
+            proximaCancion();
+        });
+
+        if (musicBtn) {
+            musicBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (musicPlayerContainer) musicPlayerContainer.classList.toggle('active');
+            });
+        }
+
+        // Validación de contraseña e inicio musical automatizado
+        function verificarPassword() {
+            const intento = passwordInput.value.trim().toLowerCase();
+            if (intento === CLAVE_SECRETA.toLowerCase()) {
+                passwordOverlay.style.opacity = '0';
+                setTimeout(() => passwordOverlay.style.display = 'none', 500);
+                
+                envelope.classList.add('open');
+                document.body.style.overflow = 'auto';
+                
+                if (musicPlayerContainer) musicPlayerContainer.style.display = 'flex'; 
+                cargarYReproducirPista(0); 
+
+                createParticles();
+                errorMsg.style.display = 'none';
+                passwordInput.value = '';
+            } else {
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        submitPassword.addEventListener('click', verificarPassword);
+        passwordInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') verificarPassword(); });
+
+        closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); 
+            envelope.classList.remove('open');
+            letter.scrollTop = 0; 
+            document.body.style.overflow = 'hidden';
+            if (musicPlayerContainer) musicPlayerContainer.style.display = 'none';
+            allVideos.forEach(video => video.pause());
+            bgMusic.pause();
+            const playPauseBtnElement = document.getElementById('playPauseBtn');
+            if (playPauseBtnElement) playPauseBtnElement.textContent = "▶️";
+        });
+
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            if(!container) return;
+            container.innerHTML = ''; 
+            for (let i = 0; i < 20; i++) {
+                let particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = Math.random() * 6 + 4 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = Math.random() * 5 + 6 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        letter.addEventListener('scroll', function() {
+            document.querySelectorAll('.reveal').forEach(reveal => {
+                if (reveal.getBoundingClientRect().top < window.innerHeight - 80) { reveal.classList.add('active'); }
+            });
+        });
+
+        // CONTADOR TEMPORAL
+        const fechaInicio = new Date("2025-11-20T00:00:00"); 
+        function actualizarContador() {
+            const diferencia = new Date() - fechaInicio;
+            if (diferencia < 0) return; 
+            
+            const dEl = document.getElementById("days");
+            const hEl = document.getElementById("hours");
+            const mEl = document.getElementById("mins");
+            const sEl = document.getElementById("secs");
+            
+            if(dEl) dEl.textContent = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            if(hEl) hEl.textContent = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            if(mEl) mEl.textContent = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+            if(sEl) sEl.textContent = Math.floor((diferencia % (1000 * 60)) / 1000);
+        }
+        setInterval(actualizarContador, 1000);
+        actualizarContador();
+    </script>
+</body>
+</html>
